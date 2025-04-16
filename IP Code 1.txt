@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;	
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        #container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500 px;
+            margin: auto;
+        }
+        h1 {
+            color: #6200ff;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #6200ff;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #260057;
+        }
+        #timer {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #000000;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confetti"></canvas>
+    <div id="container">
+        <h1>Event Countdown Timer</h1>
+        <label for="eventName">Event Name:</label>
+        <input type="text" id="eventName" placeholder="Enter event name">
+        <label for="eventTime">Select Event Date & Time:</label>
+        <input type="datetime-local" id="eventTime">
+        <button onclick="startCountdown()">Start Countdown</button>
+        
+        <h2 id="eventTitle"></h2>
+        <div id="timer">-- Years -- Months -- Days --:--:--</div>
+    </div>
+    
+    <audio id="alarm" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2"></script>
+    <script>
+        let countdown;
+        
+        function startCountdown() {
+            if (countdown) clearInterval(countdown); 
+            
+            const eventTime = new Date(document.getElementById("eventTime").value).getTime();
+            const eventName = document.getElementById("eventName").value;
+            
+            if (isNaN(eventTime) || eventName.trim() === "") {
+                alert("Please enter a valid event name and date/time.");
+                return;
+            }
+            
+            document.getElementById("eventTitle").innerText = `Countdown for: ${eventName}`;
+            
+            countdown = setInterval(() => {
+                const now = new Date().getTime();
+                const timeLeft = eventTime - now;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    document.getElementById("timer").innerHTML = "Event Started!";
+                    document.getElementById("alarm").play(); 
+                    triggerConfetti(); 
+                    return;
+                }
+                
+                const years = Math.floor(timeLeft / (1000 * 60 * 60 * 24 * 365));
+                const months = Math.floor((timeLeft % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24 * 30));
+                const days = Math.floor((timeLeft % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                document.getElementById("timer").innerHTML = 
+                    `${years} Years ${months} Months ${days} Days ${hours}:${minutes}:${seconds}`;
+            }, 1000); } 
+        function triggerConfetti() {
+            const duration = 4 * 1000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    spread: 70});
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame); }})();}
+    </script>
+</body>
+</html>
